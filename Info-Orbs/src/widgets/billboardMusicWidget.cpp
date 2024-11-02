@@ -43,15 +43,14 @@ void BillboardMusicWidget::update(bool force) {
             if (!error) {
 
                 for (int8_t i = 0; i < m_positionCount; i++) {
-                    //TODO get i'th position from the json
-                    //d = doc["data"][i];
+                    JsonDocument d = doc["data"][i];
 
-                    m_positions[i].setArtist(doc["data"][i]["artist"]);
-                    m_positions[i].setSong(doc["data"][i]["song"]);
-                    m_positions[i].setPositionLastWeek(doc["data"][i]["last_week"].as<float>());//TODO handle last week is NULL
-                    m_positions[i].setPositionThisWeek(doc["data"][i]["this_week"].as<float>());
-                    m_positions[i].setPeakPosition(doc["data"][i]["peak_position"].as<float>());
-                    m_positions[i].setWeeksInChart(doc["data"][i]["weeks_on_chart"].as<float>());
+                    m_positions[i].setArtist(d["artist"]);
+                    m_positions[i].setSong(d["song"]);
+                    m_positions[i].setPositionLastWeek(d["last_week"].as<float>());
+                    m_positions[i].setPositionThisWeek(d["this_week"].as<float>());
+                    m_positions[i].setPeakPosition(d["peak_position"].as<float>());
+                    m_positions[i].setWeeksInChart(d["weeks_on_chart"].as<float>());
                 }
                 setBusy(false);
                 m_positionDelayPrev = millis();
@@ -87,26 +86,19 @@ void BillboardMusicWidget::displayPosition(int8_t displayIndex, BillboardMusicDa
     int screenWidth = display.width();
     int centre = 120;
 
-    // Draw position data
     display.fillRect(0, 0, screenWidth, 50, 0x0256);  // rgb565 colors
     
-    //display.drawString(position.getArtist(), centre, 27, 1);
     display.drawString(String(position.getPositionThisWeek()), centre, 27, 1);
 
     display.setTextSize(2);
     display.drawString(position.getArtist(), centre, 100, 1);
-    display.setTextSize(4);
 
     display.setTextSize(2);
     display.setTextColor(TFT_MAGENTA, TFT_BLACK);
     display.drawString(position.getSong(), centre,147, 1 );
-    display.setTextSize(4);
 
     if (position.getPositionThisWeek() == position.getPositionLastWeek()) {
-        display.setTextSize(3);
-        display.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
-        display.drawString("SAME",centre, 200, 1);
-        display.setTextSize(4);
+        display.fillTriangle(110, 185, 110, 220, 145, 200, TFT_DARKGREY);
     }
     else if (position.getPositionThisWeek() > position.getPositionLastWeek()
         && position.getPositionLastWeek() > 0
@@ -118,9 +110,9 @@ void BillboardMusicWidget::displayPosition(int8_t displayIndex, BillboardMusicDa
         display.setTextColor(TFT_WHITE, TFT_BLACK);
         display.drawString("week",centre - 56, 190, 1);
         display.drawString(String(position.getWeeksInChart()),centre - 45, 210, 1);
+
         display.drawString("from",centre + 55, 190, 1);
         display.drawString(String(position.getPositionLastWeek()),centre + 41, 210, 1);
-        display.setTextSize(4);
 
     }
     else if (position.getPositionThisWeek() < position.getPositionLastWeek()
@@ -133,10 +125,6 @@ void BillboardMusicWidget::displayPosition(int8_t displayIndex, BillboardMusicDa
         display.setTextSize(3);
         display.setTextColor(TFT_YELLOW, TFT_BLACK);
         display.drawString("NEW!",centre, 200, 1);
-        display.setTextSize(4);
     }
-
-    // display.drawString(stock.getPercentChange(2) + "%", centre, 147, 1);
-    //display.drawString(String(position.getPositionThisWeek()), centre,147, 1 );
 
 }
